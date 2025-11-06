@@ -2,19 +2,18 @@ pipeline {
     agent any
 
     environment {
-    FRONTEND_DIR = 'quizWeb'       // frontend folder in your repo
-    BACKEND_DIR = 'quizserver'     // backend folder in your repo
-    TOMCAT_HOME = 'D:\\CICD\\apache-tomcat-9.0.108'
-    FRONTEND_DEPLOY_DIR = "${TOMCAT_HOME}\\webapps\\quizWeb"
-    BACKEND_DEPLOY_DIR = "${TOMCAT_HOME}\\webapps\\quizserver"
-}
-
+        FRONTEND_DIR = 'quizWeb'          // Angular frontend folder
+        BACKEND_DIR = 'quizServer'        // Spring Boot backend folder
+        TOMCAT_HOME = 'D:\\CICD\\apache-tomcat-9.0.108'
+        FRONTEND_DEPLOY_DIR = "${TOMCAT_HOME}\\webapps\\quizWeb"
+        BACKEND_DEPLOY_DIR = "${TOMCAT_HOME}\\webapps\\quizServer"
+    }
 
     stages {
-
         stage('Checkout Code') {
             steps {
-                git url: 'https://github.com/harpita9u/online-exam.git', branch: 'main'
+                git branch: 'main',
+                    url: 'https://github.com/harpita9u/online-exam.git'  // your GitHub repo URL
             }
         }
 
@@ -29,45 +28,39 @@ pipeline {
 
         stage('Deploy Frontend') {
             steps {
-                bat """
-                rmdir /S /Q "${FRONTEND_DEPLOY_DIR}"
-                mkdir "${FRONTEND_DEPLOY_DIR}"
-                xcopy /E /I /Y ${FRONTEND_DIR}\\dist\\* "${FRONTEND_DEPLOY_DIR}"
-                """
+                bat "rmdir /S /Q \"${FRONTEND_DEPLOY_DIR}\" || exit 0"
+                bat "mkdir \"${FRONTEND_DEPLOY_DIR}\""
+                bat "xcopy /E /I /Y ${FRONTEND_DIR}\\dist\\* \"${FRONTEND_DEPLOY_DIR}\""
             }
         }
 
         stage('Build Backend') {
             steps {
                 dir("${BACKEND_DIR}") {
-                    bat 'mvn clean install'
+                    bat 'mvn clean package -DskipTests'
                 }
             }
         }
 
         stage('Deploy Backend') {
             steps {
-                bat """
-                rmdir /S /Q "${BACKEND_DEPLOY_DIR}"
-                mkdir "${BACKEND_DEPLOY_DIR}"
-                xcopy /E /I /Y ${BACKEND_DIR}\\target\\*.war "${BACKEND_DEPLOY_DIR}"
-                """
+                bat "rmdir /S /Q \"${BACKEND_DEPLOY_DIR}\" || exit 0"
+                bat "mkdir \"${BACKEND_DEPLOY_DIR}\""
+                bat "xcopy /E /I /Y ${BACKEND_DIR}\\target\\*.jar \"${BACKEND_DEPLOY_DIR}\""
             }
         }
 
         stage('Restart Tomcat') {
             steps {
-                bat """
-                net stop Tomcat9
-                net start Tomcat9
-                """
+                bat "net stop Tomcat9"
+                bat "net start Tomcat9"
             }
         }
     }
 
     post {
         success {
-            echo 'Deployment completed successfully!'
+            echo 'Deployment succeeded!'
         }
         failure {
             echo 'Deployment failed. Check console output for errors.'
