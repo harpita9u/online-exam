@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     environment {
-        FRONTEND_DIR = 'frontend'
-        BACKEND_DIR = 'backend'
-        TOMCAT_HOME = 'D:\\CICD\\apache-tomcat-9.0.108'
-        FRONTEND_DEPLOY_DIR = "${TOMCAT_HOME}\\webapps\\frontend"
-        BACKEND_DEPLOY_DIR = "${TOMCAT_HOME}\\webapps\\backend"
-        BACKEND_JAR = 'backend.jar'
-    }
+    FRONTEND_DIR = 'quizWeb'       // frontend folder in your repo
+    BACKEND_DIR = 'quizserver'     // backend folder in your repo
+    TOMCAT_HOME = 'D:\\CICD\\apache-tomcat-9.0.108'
+    FRONTEND_DEPLOY_DIR = "${TOMCAT_HOME}\\webapps\\quizWeb"
+    BACKEND_DEPLOY_DIR = "${TOMCAT_HOME}\\webapps\\quizserver"
+}
+
 
     stages {
 
